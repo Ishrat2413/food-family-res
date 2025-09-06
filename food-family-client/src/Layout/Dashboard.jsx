@@ -61,7 +61,7 @@ const Dashboard = () => {
                             </li>
                             <li>
                                 <NavLink
-                                    to='/dashboard/manageBookings'
+                                    to='/dashboard/adminFoodPayments'
                                     className={({ isActive }) =>
                                         `flex items-center gap-2 p-3 rounded-lg transition-all duration-200 ${isActive
                                             ? 'bg-white text-[#294626] font-semibold shadow-lg'
@@ -70,7 +70,7 @@ const Dashboard = () => {
                                     }
                                 >
                                     <FaBook />
-                                    Manage Bookings
+                                    Food Payments
                                 </NavLink>
                             </li>
                             <li>
@@ -102,20 +102,6 @@ const Dashboard = () => {
                                     >
                                         <FaHome />
                                         User Home
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to='/dashboard/reservation'
-                                        className={({ isActive }) =>
-                                            `flex items-center gap-2 p-3 rounded-lg transition-all duration-200 ${isActive
-                                                ? 'bg-white text-[#294626] font-semibold shadow-lg'
-                                                : 'hover:bg-green-700 hover:bg-opacity-50'
-                                            }`
-                                        }
-                                    >
-                                        <FaCalendar />
-                                        Reservation
                                     </NavLink>
                                 </li>
                                 <li>
@@ -158,20 +144,6 @@ const Dashboard = () => {
                                     >
                                         <FaComment />
                                         Add Review
-                                    </NavLink>
-                                </li>
-                                <li>
-                                    <NavLink
-                                        to='/dashboard/myBooking'
-                                        className={({ isActive }) =>
-                                            `flex items-center gap-2 p-3 rounded-lg transition-all duration-200 ${isActive
-                                                ? 'bg-white text-[#294626] font-semibold shadow-lg'
-                                                : 'hover:bg-green-700 hover:bg-opacity-50'
-                                            }`
-                                        }
-                                    >
-                                        <FaCalendarCheck />
-                                        My Booking
                                     </NavLink>
                                 </li>
                             </>

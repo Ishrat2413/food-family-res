@@ -22,6 +22,8 @@ import Payment from "../pages/Dashboard/Payment/Payment";
 import PaymentHistory from "../pages/Dashboard/PaymentHistory/PaymentHistory";
 import UserHome from "../pages/Dashboard/UserHome/UserHome";
 import AdminHome from "../pages/Dashboard/AdminHome/AdminHome";
+import AdminPayments from "../pages/Dashboard/AdminFoodPayments/AdminFoodPayments";
+import AddReview from "../pages/Dashboard/AddReview/AddReview";
 
 export const router = createBrowserRouter([
   {
@@ -75,6 +77,10 @@ export const router = createBrowserRouter([
         path: 'paymentHistory',
         element: <PaymentHistory />,
       },
+      {
+        path: 'addReview',
+        element: <AddReview />,
+      },
 
       // admin routes
       {
@@ -84,6 +90,10 @@ export const router = createBrowserRouter([
       {
         path: 'addItems',
         element: <AdminRoute><AddItems /></AdminRoute>,
+      },
+      {
+        path: 'adminFoodPayments',
+        element: <AdminRoute><AdminPayments /></AdminRoute>,
       },
       {
         path: 'manageItems',

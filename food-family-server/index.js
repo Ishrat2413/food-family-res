@@ -40,7 +40,7 @@ async function run() {
     app.post("/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "2h",
       });
       res.send({ token });
     });
@@ -187,6 +187,17 @@ async function run() {
       res.send(result);
     });
 
+    // Add a new review
+    app.post("/reviews", async (req, res) => {
+      try {
+        const review = req.body;
+        const result = await reviewsCollection.insertOne(review);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error submitting review" });
+      }
+    });
+
     // carts collections
     app.get("/carts", async (req, res) => {
       // so that, ekta specific email er order show kore
@@ -249,6 +260,116 @@ async function run() {
       const deleteResult = await cartCollection.deleteMany(query);
       // res.send(paymentResult, deleteResult);
       res.send({ paymentResult, deleteResult });
+    });
+
+    // Get all payments (admin only)
+    app.get("/payments", verifyToken, verifyAdmin, async (req, res) => {
+      try {
+        const result = await paymentCollection
+          .find()
+          .sort({ date: -1 })
+          .toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching payments" });
+      }
+    });
+
+    // Update payment status
+    app.patch("/payments/:id", verifyToken, verifyAdmin, async (req, res) => {
+      try {
+        const id = req.params.id;
+        const { status } = req.body;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: { status: status },
+        };
+        const result = await paymentCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error updating payment status" });
+      }
+    });
+
+    // stats or analytics for admin
+    app.get("/admin-stats", verifyToken, verifyAdmin, async (req, res) => {
+      const users = await userCollection.estimatedDocumentCount();
+      const menuItems = await menuCollection.estimatedDocumentCount();
+      const orders = await paymentCollection.estimatedDocumentCount();
+
+      // this is not the best way
+      // const payments = await paymentCollection.find().toArray();
+      // const revenue = payments.reduce(
+      //   (total, payment) => total + payment.price,
+      //   0
+      // );
+
+      // best way with pipeline
+      const result = await paymentCollection
+        .aggregate([
+          {
+            $group: {
+              _id: null,
+              totalRevenue: {
+                $sum: "$price",
+              },
+            },
+          },
+        ])
+        .toArray();
+      const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+      res.send({
+        users,
+        menuItems,
+        orders,
+        revenue,
+      });
+    });
+
+    // order stats
+    /**
+     * load all the payment
+     * for every menuItemIds(in array), go find the item from the menu collection
+     * for every item in the menu collection that you found from a payment entry(document)
+     *
+     * using aggregate pipeline
+     */
+
+    app.get("/order-stats", verifyToken, verifyAdmin, async (req, res) => {
+      const result = await paymentCollection
+        .aggregate([
+          {
+            $unwind: "$menuItemIds",
+          },
+          {
+            $lookup: {
+              from: "menu",
+              localField: "menuItemIds",
+              foreignField: "_id",
+              as: "menuItems",
+            },
+          },
+          {
+            $unwind: "$menuItems",
+          },
+          {
+            $group: {
+              _id: "$menuItems.category",
+              quantity: { $sum: 1 },
+              revenue: { $sum: "$menuItems.price" },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              category: "$_id",
+              quantity: "$quantity",
+              revenue: "$revenue",
+            },
+          },
+        ])
+        .toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
